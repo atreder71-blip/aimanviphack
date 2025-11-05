@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aiman VIP Login</title>
+<style>
+body {
+  background: #0d0d0d;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #000;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+h2 {
+  color: #00ffcc;
+  margin-bottom: 20px;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+}
+button {
+  background: #00ffcc;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+button:hover { background: #00ffaa; }
+.message {
+  margin-top: 15px;
+  font-size: 15px;
+}
+.success { color: #00ff88; }
+.error { color: #ff5555; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>🔐 AIMAN VIP LOGIN</h2>
+  <input type="text" id="userKey" placeholder="XXXX-XXXX-XXXX-XXXX">
+  <button onclick="verifyKey()">Verify Key</button>
+  <div id="msg" class="message"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+
+<script>
+// ✅ তোমার নতুন Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBHrOTVH_F12MqspigTwB_P7wk3zfptOIk",
+  authDomain: "aiman-topup.firebaseapp.com",
+  databaseURL: "https://aiman-topup-default-rtdb.firebaseio.com",
+  storageBucket: "aiman-topup.firebasestorage.app",
+  messagingSenderId: "1083504860187",
+  appId: "1:1083504860187:android:016cc9feb724aec813ecbe"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database().ref("Keys");
+
+function verifyKey() {
+  const userKey = document.getElementById("userKey").value.trim().toUpperCase();
+  const msg = document.getElementById("msg");
+
+  if (!userKey) {
+    msg.innerHTML = "⚠️ Please enter your key!";
+    msg.className = "message error";
+    return;
+  }
+
+  msg.innerHTML = "⏳ Verifying...";
+  msg.className = "message";
+
+  db.child(userKey).once("value")
+  .then(snap => {
+    const data = snap.val();
+    if (!data) {
+      msg.innerHTML = "❌ Invalid key!";
+      msg.className = "message error";
+      return;
+    }
+
+    const now = Date.now();
+    if (!data.isActive) {
+      msg.innerHTML = "🔒 Key is deactivated!";
+      msg.className = "message error";
+    } else if (now > data.expiresAt) {
+      msg.innerHTML = "⛔ Key expired!";
+      msg.className = "message error";
+    } else {
+      msg.innerHTML = `✅ Access Granted!<br>Welcome to AIMAN VIP 🔥<br><small>Expires: ${new Date(data.expiresAt).toLocaleString()}</small>`;
+      msg.className = "message success";
+      localStorage.setItem("validUser", "true");
+      setTimeout(() => {
+        window.location.href = "https://atreder71-blip.github.io/aimanvip/"; // 🔧 তোমার main পেজের নাম বসাও
+      }, 2000);
+    }
+  })
+  .catch(err => {
+    msg.innerHTML = "⚠️ Error: " + err.message;
+    msg.className = "message error";
+  });
+}
+</script>
+</body>
+</html>
